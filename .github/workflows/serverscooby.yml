@@ -1,7 +1,10 @@
 name: RUN_RDP
+
 on: workflow_dispatch
+
 jobs:
   build:
+
     runs-on: windows-latest
     timeout-minutes: 9999
 
@@ -29,3 +32,18 @@ jobs:
         
     - name: Create a NGROK .yml file.
       run: start NGROK_AP.bat
+      
+    - name: Turn on RDP connection.
+      run: | 
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -Value 0
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
+        
+    - name: Create NGROK connection.
+      run: sc start ngrok
+      
+    - name: Run connection.
+      run: cmd /c NGROK_CHECK.bat
+      
+    - name: Success! You can run VPS use this informations.
+      run: cmd /c NGROK_LOOP.bat
